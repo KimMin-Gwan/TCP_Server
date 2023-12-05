@@ -1,0 +1,7 @@
+
+TMAP_APPKEY = "P56mSqdnljg7fNjmu2BD5I1DEutBPcVazegTouZ8"
+
+HOST = "127.0.0.1"
+PORT = "9999"
+
+BUFFER_SIZE = 1024
