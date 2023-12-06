@@ -5,23 +5,16 @@ from time import sleep
 from controller import Master_Controller
 from constant import HOST, PORT, BUFFER_SIZE
 
-"""
-Client를 정의하기 위한 클래스
-socket과 address를 가지고 있다.
-"""
-class Client():
-    def __init__(self, id, client_socket:socket.socket, addr:socket._RetAddress):
-        self._id:int = id
-        self._client_socket:socket.socket = client_socket
-        self._addr:socket._RetAddress = addr
 
-    def get_client_id(self):
-        return self._id
-
-    # 주소데이터 호출
-    def get_addr(self):
-        return self._addr
+class Socket:
+    def __init__(self, socket, addr):
+        self.__socket = socket
+        self.__addr = addr
     
+    #주소 데이터 반환
+    def get_addr():
+        return self.__addr
+
     # 데이터 받기
     # data = <데이터타입>:<본문>
     # head = 데이터 타입  ('FILE', "STRING")
@@ -31,25 +24,63 @@ class Client():
         decoded_data = data.decode()
         head, body= self.__recognize_protocol(data = decoded_data)
         print(f"{head}Received Data : {body}")
-        return head, body 
-    
+        return head, body   
+
+
     # String 보내기
     def send_data(self, data:str):
         encoded_data = data.encode()
         self._client_socket.sendall(encoded_data)
         return 
 
-    ## 파일전송
-    #def send_file(self, data:bytes):
-        #self._client_socket.sendall(data)
-        #return
+    # 파일전송
+    def send_file(self, data:bytes):
+        self._client_socket.sendall(data)
+        return
     
     # 프로토콜 분석
     def __recognize_protocol(self, data:str):
         data_parts = data.split(":")
         return data_parts[0], data_parts[1:]
 
-    
+
+
+"""
+Client를 정의하기 위한 클래스
+socket과 address를 가지고 있다.
+"""
+class Client(Socket):
+    def __init__(self, id, client_socket:socket.socket, addr:socket._RetAddress):
+        self._id:int = id
+        self._data = {'bid':'-1', 'target':'default'}
+        self._flag = False
+        super.__init__(client_socket, addr)
+
+
+    def get_client_id(self):
+        return self._id
+
+    def get_data(self)
+        return self._data
+
+    def set_data(self, bid:str, target:str):
+        self._data['bid'] = bid
+        self._data['target'] = target
+        return
+
+
+    def isDataReady(self):
+        return self._flag
+
+
+    def dataReady(self):
+        self._flag = True
+        retrun
+
+    def dataReset(self):
+        self._flag = False
+        return
+
 
 class AppServer:
     def __init__(self):
