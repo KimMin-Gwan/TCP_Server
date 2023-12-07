@@ -21,19 +21,17 @@ try :
         client_socket, addr = server_sock.accept()
         print(f"Client Connected : {addr}")
 
-        # 데이터 수신
-        # 클라이언트로 부터 데이터를 전송 받는다
-        DATA_SIZE = 1024
-        data = client_socket.recv(DATA_SIZE)
-        recived_data = data.decode()
-        print("Received Data : ", recived_data)
 
         # 데이터 송신
         # 클라이언트 방향으로 데이터를 전송한다
-        message = "Hello, Client!"
-        encoded_data = message.encode()
-        client_socket.sendall(encoded_data)
-
+        data = client_socket.recv(1024)
+        with open("./cat2.jpg", 'wb') as file:
+            while data:
+                file.write(data)
+                data = client_socket.recv(1024)
+        
+        message = ""
+        
         client_socket.close()
 except KeyboardInterrupt:
     print("Key Board Interrupt irrupted")

@@ -1,6 +1,6 @@
-from fastapi import UploadFile ,File
-import time
-import shutil
+#from fastapi import UploadFile ,File
+#import time
+#import shutil
 import speech_recognition as sr
 
 import re  # String 분석용도 
@@ -12,20 +12,24 @@ from model import Master_Model, Target
 class Master_Controller:
     def __init__(self, model:Master_Model = None):
         print("SYSTEM_CALL||Master_Controller_Created")
-        self.model:Master_Model = model # 마스터 모델
+        self.__model:Master_Model = model # 마스터 모델
         
     # 최단 거리 검색
-    def makeWAV2Text(self, file:UploadFile= None):
+    #def makeWAV2Text(self, file:UploadFile= None):
+    def makeWAV2Text(self, id):
         # 저장경로
-        save_path = f"./temp/{file.filename}" 
-        with open(save_path, "wb") as f:
-            shutil.copyfileobj(file.file, f) # 받은 파일 저장
-        print(f"SYSTEM_CALL||WAV_File_Saved_to_{save_path}")
-        time.sleep(0.5) # 잠시 대기
+        #save_path = f"./temp/{file.filename}" 
+        #with open(save_path, "wb") as f:
+            #shutil.copyfileobj(file.file, f) # 받은 파일 저장
+        #print(f"SYSTEM_CALL||WAV_File_Saved_to_{save_path}")
+        #time.sleep(0.5) # 잠시 대기
+        
+        #파일 이름 지정
+        file_name = f"./sample{id}.wav"
         
         # Wav파일 분석 및 목표 찾기
         wav_recognizer = Wav_Recognizer()
-        result:str = wav_recognizer.recognizing_file(save_path)
+        result:str = wav_recognizer.recognizing_file(file_path=file_name)
         print(f"Target_place : {result}")
         
         # dict 형태로 반환 데이터 준비
@@ -33,11 +37,12 @@ class Master_Controller:
         return return_data
 
     # 최단 경로 계산
-    def getShortestPath(self, bid:int = -1, target:str = "default"):
+    def getShortestPath(self, bid:str= '-1', target:str = "default"):
         print(f"SYSTEM_CALL||BID:{bid}and_Target:{target}_inserted")
         
+        
         # 예외처리 return 문
-        if bid == -1 or target == "default":
+        if bid == '-1' or target == "default":
             return 
         
         # 경로 검색기 생성
@@ -46,10 +51,10 @@ class Master_Controller:
         bid = str(bid)
 
         # 현재 위치와 목표 위치 설정
-        now_place:Target = self.model.get_coord(bid)
-        target_place:Target = self.model.make_target(target=target)
-        print("now_place :", now_place.x)
-        print("target_place :", target_place.x)
+        now_place:Target = self.__model.get_coord(bid)
+        target_place:Target = self.__model.make_target(target=target)
+        print("now_place :", now_place.get_name())
+        print("target_place :", target_place.get_name())
 
         # Tmap 대중교통 경로 검색
         bus = path_finder.path_finding(now_place=now_place, target_place=target_place)
@@ -82,35 +87,17 @@ class Path_Finder:
             "appKey": TMAP_APPKEY,  # 인증 토큰
             "content-type":"application/json"
         }
-    
-        """ headers
-        - accept : application/json
-        - appKey : 발급 Appkey
-        - content-type : application/json
-        """
 
         # 전송할 데이터 (바디)
         body = {
-            "startX": str(now_place.x),
-            "startY": str(now_place.y),
-            "endX": str(target_place.x),
-            "endY": str(target_place.y),
+            "startX": str(now_place.get_x()),
+            "startY": str(now_place.get_y()),
+            "endX": str(target_place.get_x()),
+            "endY": str(target_place.get_y()),
             "count" : 1,
             "lang": 0,
             "format":"json"
         }
-        
-        """ body
-        {
-            "startX": "127.02550910860451",
-            "startY": "37.63788539420793",
-            "endX": "127.030406594109",
-            "endY": "37.609094989686",
-            "count" : 1,
-            "lang": 0,
-            "format":"json"
-        }
-        """
 
         # POST 요청 보내기
         response = requests.post(api_url, headers=headers, json=body)
@@ -123,7 +110,6 @@ class Path_Finder:
         
         # bus정보의 리스트
         return result
-        
 
     def __get_data_from_response(self, response:dict):
         
@@ -137,7 +123,7 @@ class Wav_Recognizer:
         self.__recognizer = sr.Recognizer()
     
     # 분석기
-    def recognizing_file(self, file_path = "./"):
+    def recognizing_file(self, file_path = "./temp/"):
         # 음성 파일 열기
         with sr.AudioFile(file_path) as source:
             audio = self.__recognizer.record(source, duration= 120)
