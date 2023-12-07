@@ -8,10 +8,7 @@ class Node:
         
     def setData(self, data):
         self.__data = data
-        return
-       
-    def getData(self):
-        return self.__data
+        return     
     
     def setFront(self, node):
         self.__front = node 
@@ -20,6 +17,9 @@ class Node:
     def setBackword(self, node):
         self.__backword = node 
         return 
+
+    def getData(self):
+        return self.__data
 
     def getFront(self):
         return self.__front
