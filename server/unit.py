@@ -37,7 +37,7 @@ class TCP_Server:
 
 
     def waiting_client(self, client_list:Linked_List):
-        terminate_flag = False
+        terminate_flag = [False]
         print("SYSTEM_CALL||Waiting for Client...")
         try:
             while True:
@@ -65,19 +65,19 @@ class TCP_Server:
 
         finally:
             print("SYSTEM_CALL||terminate all")
-            terminate_flag = True
+            terminate_flag[0] = True
             sleep(1.0)
             self.__server_socket.close()
 
     # 클라이언트 처리 함수 (멀티 스레드로 운영됨)
     # 매게변수(client_socket)
-    def __client_handle(self, client_node:Node, client_list:Linked_List, terminate_flag):
+    def __client_handle(self, client_node:Node, client_list:Linked_List, terminate_flag:list):
         client:Client = client_node.getData()
         print(f"SYSTEM_CALL||Start to Comunicate {client.get_addr()}")
         
         FILE_NAME = f"./sample{client.get_client_id()}.wav"
 
-        while not terminate_flag:
+        while not terminate_flag[0]:
             head, body = client.recive_data()
             client.send_data("FILE")
 
@@ -113,8 +113,9 @@ class TCP_Server:
                 client.close_socket()
                 try:
                     client_list.removeNode(client_node)
-                except:
+                except Exception as e:
                     return
+                break
 
             while not client.get_flag() == "Ready":
                 sleep(0.5)
@@ -122,7 +123,7 @@ class TCP_Server:
             
             client.send_result(client.get_data()['result'])
             client.dataReset()
-            
+        return
             
             
                 
